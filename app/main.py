@@ -2,6 +2,7 @@ import sys
 import os
 import zlib
 import hashlib
+import time
 
 def main():
     command = sys.argv[1]
@@ -18,6 +19,11 @@ def main():
         ls_tree(tree_sha)
     elif command == "write-tree":
         print(write_tree("."))  # Ensure the SHA-1 hash is printed
+    elif command == "commit-tree":
+        tree_sha = sys.argv[2]
+        parent_commit_sha = sys.argv[4]
+        message = sys.argv[6]
+        print(commit_tree(tree_sha, parent_commit_sha, message))  # Ensure the SHA-1 hash is printed
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
@@ -166,6 +172,40 @@ def create_blob_entry(path):
         f.write(compressed_data)
     
     return sha
+
+def commit_tree(tree_sha, parent_commit_sha, message):
+    """Creates a commit object and writes it to the repository."""
+    author = "Author Name <author@example.com>"
+    committer = "Committer Name <committer@example.com>"
+    timestamp = int(time.time())
+    timezone = time.strftime("%z")
+    
+    commit_content = (
+        f"tree {tree_sha}\n"
+        f"parent {parent_commit_sha}\n"
+        f"author {author} {timestamp} {timezone}\n"
+        f"committer {committer} {timestamp} {timezone}\n\n"
+        f"{message}\n"
+    ).encode()
+    
+    header = f"commit {len(commit_content)}\0".encode()
+    store = header + commit_content
+    
+    sha1 = hashlib.sha1(store).hexdigest()
+    
+    dir_name = sha1[:2]
+    file_name = sha1[2:]
+    object_path = os.path.join(".git", "objects", dir_name, file_name)
+    
+    if not os.path.exists(os.path.join(".git", "objects", dir_name)):
+        os.mkdir(os.path.join(".git", "objects", dir_name))
+    
+    compressed_data = zlib.compress(store)
+    
+    with open(object_path, "wb") as f:
+        f.write(compressed_data)
+    
+    return sha1
 
 if __name__ == "__main__":
     main()
