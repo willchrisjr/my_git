@@ -3,8 +3,8 @@ import os
 import zlib
 
 def main():
-    print("Logs from your program will appear here!")
-
+    # Uncomment this block to pass the first stage
+    #
     command = sys.argv[1]
     if command == "init":
         os.mkdir(".git")
