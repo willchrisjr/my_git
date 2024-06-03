@@ -68,12 +68,112 @@ Reads a blob object from the git repository and prints its content.
 
 Usage:
 
-sh
-Copy Code
 $ python main.py cat-file -p <blob_sha>
+
 Example:
 
-sh
-Copy Code
+
 $ python main.py cat-file -p e88f7a929cd70b0274c4ea33b209c97fa845fdbc
 hello world
+
+
+--
+# My Git Implementation
+
+This project is a simplified implementation of some core Git functionalities. The current implementation supports initializing a new Git repository, reading blob objects, and creating blob objects.
+
+## Commands
+
+### `init`
+Initializes a new git repository.
+
+**Usage:**
+```sh
+$ python main.py init
+```
+
+**Description:**
+- Creates a `.git` directory with the necessary subdirectories and files.
+- Initializes the repository with a default `HEAD` pointing to `refs/heads/main`.
+
+### `cat-file`
+Reads a blob object from the git repository and prints its content.
+
+**Usage:**
+```sh
+$ python main.py cat-file -p <blob_sha>
+```
+
+**Example:**
+```sh
+$ python main.py cat-file -p e88f7a929cd70b0274c4ea33b209c97fa845fdbc
+hello world
+```
+
+**Description:**
+- Reads the contents of the blob object file from the `.git/objects` directory.
+- Decompresses the contents using Zlib.
+- Extracts the actual content from the decompressed data.
+- Prints the content to stdout.
+
+### `hash-object`
+Computes the SHA-1 hash of a file and writes the blob object to the git repository.
+
+**Usage:**
+```sh
+$ python main.py hash-object -w <file_path>
+```
+
+**Example:**
+```sh
+$ echo "hello world" > test.txt
+$ python main.py hash-object -w test.txt
+3b18e512dba79e4c8300dd08aeb37f8e728b8dad
+```
+
+**Description:**
+- Reads the contents of the specified file.
+- Creates the blob object format: `blob <size>\0<content>`.
+- Computes the SHA-1 hash of the blob object.
+- Compresses the blob object using Zlib.
+- Writes the compressed blob object to the `.git/objects` directory.
+- Prints the SHA-1 hash to stdout.
+
+## Example Workflow
+
+1. Initialize a new git repository:
+    ```sh
+    $ python main.py init
+    Initialized git directory
+    ```
+
+2. Create a file and compute its SHA-1 hash:
+    ```sh
+    $ echo "hello world" > test.txt
+    $ python main.py hash-object -w test.txt
+    3b18e512dba79e4c8300dd08aeb37f8e728b8dad
+    ```
+
+3. Read the blob object:
+    ```sh
+    $ python main.py cat-file -p 3b18e512dba79e4c8300dd08aeb37f8e728b8dad
+    hello world
+    ```
+
+## Notes
+
+- The `cat-file` command must not append a newline to the output.
+- The SHA-1 hash for the `hash-object` command is computed over the uncompressed contents of the file.
+- The input for the SHA-1 hash is the header (`blob <size>\0`) + the actual contents of the file.
+
+## Requirements
+
+- Python 3.x
+- Zlib library (usually included with Python)
+
+## License
+
+This project is licensed under the MIT License.
+```
+
+This `README.md` provides a comprehensive overview of the project, including usage examples and descriptions for each command. If you need any further modifications or additional sections, please let me know!
