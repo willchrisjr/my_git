@@ -1,7 +1,4 @@
-[![progress-banner](https://backend.codecrafters.io/progress/git/ec9d73f2-72fe-48f1-8473-c55d10f70d7c)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-This is a starting point for Python solutions to the
-["Build Your Own Git" Challenge](https://codecrafters.io/challenges/git).
 
 In this challenge, you'll build a small Git implementation that's capable of
 initializing a repository, creating commits and cloning a public repository.
@@ -58,3 +55,27 @@ alias mygit=/path/to/your/repo/your_git.sh
 mkdir -p /tmp/testing && cd /tmp/testing
 mygit init
 ```
+# My Git Implementation
+
+## Commands
+
+### `init`
+Initializes a new git repository.
+
+**Usage:**
+```sh
+$ python main.py init
+cat-file
+Reads a blob object from the git repository and prints its content.
+
+Usage:
+
+sh
+Copy Code
+$ python main.py cat-file -p <blob_sha>
+Example:
+
+sh
+Copy Code
+$ python main.py cat-file -p e88f7a929cd70b0274c4ea33b209c97fa845fdbc
+hello world
