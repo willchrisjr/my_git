@@ -12,12 +12,12 @@ def main():
         read_blob(blob_sha)
     elif command == "hash-object" and sys.argv[2] == "-w":
         file_path = sys.argv[3]
-        hash_object(file_path)
+        print(hash_object(file_path))  # Ensure the SHA-1 hash is printed
     elif command == "ls-tree" and sys.argv[2] == "--name-only":
         tree_sha = sys.argv[3]
         ls_tree(tree_sha)
     elif command == "write-tree":
-        write_tree()
+        print(write_tree("."))  # Ensure the SHA-1 hash is printed
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
@@ -68,7 +68,7 @@ def hash_object(file_path):
     with open(object_path, "wb") as f:
         f.write(compressed_data)
     
-    return sha1
+    return sha1  # Ensure the SHA-1 hash is returned
 
 def ls_tree(tree_sha):
     """Inspects a tree object and prints the names of the entries."""
@@ -102,27 +102,23 @@ def ls_tree(tree_sha):
     for entry in entries:
         print(entry[1])
 
-def write_tree():
+def write_tree(path):
     """Creates a tree object from the current state of the working directory and writes it to the repository."""
-    tree_sha = write_tree_recursive(".")
-    print(tree_sha)
-
-def write_tree_recursive(directory):
-    """Recursively creates tree objects for directories and writes them to the repository."""
-    entries = []
+    if os.path.isfile(path):
+        return create_blob_entry(path)
     
-    for entry in sorted(os.listdir(directory)):
+    entries = []
+    for entry in sorted(os.listdir(path)):
         if entry == ".git":
             continue
         
-        entry_path = os.path.join(directory, entry)
-        
+        entry_path = os.path.join(path, entry)
         if os.path.isdir(entry_path):
-            mode = "040000"
-            sha = write_tree_recursive(entry_path)
+            mode = "40000"
+            sha = write_tree(entry_path)
         else:
             mode = "100644"
-            sha = hash_object(entry_path)
+            sha = create_blob_entry(entry_path)
         
         sha_bytes = bytes.fromhex(sha)
         entries.append(f"{mode} {entry}\0".encode() + sha_bytes)
@@ -146,6 +142,30 @@ def write_tree_recursive(directory):
         f.write(compressed_data)
     
     return sha1
+
+def create_blob_entry(path):
+    """Creates a blob object for a file and writes it to the repository."""
+    with open(path, "rb") as f:
+        data = f.read()
+    
+    header = f"blob {len(data)}\0".encode()
+    store = header + data
+    
+    sha = hashlib.sha1(store).hexdigest()
+    
+    dir_name = sha[:2]
+    file_name = sha[2:]
+    object_path = os.path.join(".git", "objects", dir_name, file_name)
+    
+    if not os.path.exists(os.path.join(".git", "objects", dir_name)):
+        os.mkdir(os.path.join(".git", "objects", dir_name))
+    
+    compressed_data = zlib.compress(store)
+    
+    with open(object_path, "wb") as f:
+        f.write(compressed_data)
+    
+    return sha
 
 if __name__ == "__main__":
     main()
