@@ -18,6 +18,9 @@ def main():
     elif command == "hash-object" and sys.argv[2] == "-w":
         file_path = sys.argv[3]
         hash_object(file_path)
+    elif command == "ls-tree" and sys.argv[2] == "--name-only":
+        tree_sha = sys.argv[3]
+        ls_tree(tree_sha)
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
@@ -58,6 +61,42 @@ def hash_object(file_path):
         f.write(compressed_data)
     
     print(sha1)
+
+def ls_tree(tree_sha):
+    dir_name = tree_sha[:2]
+    file_name = tree_sha[2:]
+    object_path = os.path.join(".git", "objects", dir_name, file_name)
+    
+    with open(object_path, "rb") as f:
+        compressed_data = f.read()
+        decompressed_data = zlib.decompress(compressed_data)
+    
+    # Skip the header
+    null_byte_index = decompressed_data.index(b'\x00')
+    entries_data = decompressed_data[null_byte_index + 1:]
+    
+    entries = []
+    i = 0
+    while i < len(entries_data):
+        # Read mode
+        mode_end = entries_data.index(b' ', i)
+        mode = entries_data[i:mode_end].decode()
+        i = mode_end + 1
+        
+        # Read name
+        name_end = entries_data.index(b'\x00', i)
+        name = entries_data[i:name_end].decode()
+        i = name_end + 1
+        
+        # Read SHA (20 bytes)
+        sha = entries_data[i:i + 20]
+        i += 20
+        
+        entries.append((mode, name, sha))
+    
+    # Print names only
+    for entry in entries:
+        print(entry[1])
 
 if __name__ == "__main__":
     main()
