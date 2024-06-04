@@ -1,179 +1,135 @@
-# My Git Implementation
-
-In this challenge, you'll build a small Git implementation that's capable of
-initializing a repository, creating commits and cloning a public repository.
-Along the way we'll learn about the `.git` directory, Git objects (blobs,
-commits, trees etc.), Git's transfer protocols and more.
 
 
 
-# Passing the first stage
 
-The entry point for your Git implementation is in `app/main.py`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+# Git Implementation
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
+This is an implementation of some core Git functionalities. It allows you to initialize a repository, hash objects, list tree contents, write trees, commit trees, and clone repositories to demonstrate the inner workings of Git.
 
-That's all!
+## Features
 
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `python` installed locally
-1. Run `./your_git.sh` to run your Git implementation, which is implemented in
-   `app/main.py`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
-
-# Testing locally
-
-The `your_git.sh` script is expected to operate on the `.git` folder inside the
-current working directory. If you're running this inside the root of this
-repository, you might end up accidentally damaging your repository's `.git`
-folder.
-
-We suggest executing `your_git.sh` in a different folder when testing locally.
-For example:
-
-```sh
-mkdir -p /tmp/testing && cd /tmp/testing
-/path/to/your/repo/your_git.sh init
-```
-
-To make this easier to type out, you could add a
-[shell alias](https://shapeshed.com/unix-alias/):
-
-```sh
-alias mygit=/path/to/your/repo/your_git.sh
-
-mkdir -p /tmp/testing && cd /tmp/testing
-mygit init
-```
-
-## Commands
-
-### `init`
-Initializes a new git repository.
-
-**Usage:**
-```sh
-$ python main.py init
-cat-file
-Reads a blob object from the git repository and prints its content.
-
-Usage:
-
-$ python main.py cat-file -p <blob_sha>
-
-Example:
-
-
-$ python main.py cat-file -p e88f7a929cd70b0274c4ea33b209c97fa845fdbc
-hello world
-
-
---
-# My Git Implementation
-
-This project is a simplified implementation of some core Git functionalities. The current implementation supports initializing a new Git repository, reading blob objects, and creating blob objects.
-
-## Commands
-
-### `init`
-Initializes a new git repository.
-
-**Usage:**
-```sh
-$ python main.py init
-```
-
-**Description:**
-- Creates a `.git` directory with the necessary subdirectories and files.
-- Initializes the repository with a default `HEAD` pointing to `refs/heads/main`.
-
-### `cat-file`
-Reads a blob object from the git repository and prints its content.
-
-**Usage:**
-```sh
-$ python main.py cat-file -p <blob_sha>
-```
-
-**Example:**
-```sh
-$ python main.py cat-file -p e88f7a929cd70b0274c4ea33b209c97fa845fdbc
-hello world
-```
-
-**Description:**
-- Reads the contents of the blob object file from the `.git/objects` directory.
-- Decompresses the contents using Zlib.
-- Extracts the actual content from the decompressed data.
-- Prints the content to stdout.
-
-### `hash-object`
-Computes the SHA-1 hash of a file and writes the blob object to the git repository.
-
-**Usage:**
-```sh
-$ python main.py hash-object -w <file_path>
-```
-
-**Example:**
-```sh
-$ echo "hello world" > test.txt
-$ python main.py hash-object -w test.txt
-3b18e512dba79e4c8300dd08aeb37f8e728b8dad
-```
-
-**Description:**
-- Reads the contents of the specified file.
-- Creates the blob object format: `blob <size>\0<content>`.
-- Computes the SHA-1 hash of the blob object.
-- Compresses the blob object using Zlib.
-- Writes the compressed blob object to the `.git/objects` directory.
-- Prints the SHA-1 hash to stdout.
-
-## Example Workflow
-
-1. Initialize a new git repository:
-    ```sh
-    $ python main.py init
-    Initialized git directory
-    ```
-
-2. Create a file and compute its SHA-1 hash:
-    ```sh
-    $ echo "hello world" > test.txt
-    $ python main.py hash-object -w test.txt
-    3b18e512dba79e4c8300dd08aeb37f8e728b8dad
-    ```
-
-3. Read the blob object:
-    ```sh
-    $ python main.py cat-file -p 3b18e512dba79e4c8300dd08aeb37f8e728b8dad
-    hello world
-    ```
-
-## Notes
-
-- The `cat-file` command must not append a newline to the output.
-- The SHA-1 hash for the `hash-object` command is computed over the uncompressed contents of the file.
-- The input for the SHA-1 hash is the header (`blob <size>\0`) + the actual contents of the file.
+- Initialize a new Git repository
+- Hash files and create Git objects
+- List the contents of a tree object
+- Write the current directory tree to a tree object
+- Create a commit object
+- Clone a remote repository
 
 ## Requirements
 
-- Python 3.x
-- Zlib library (usually included with Python)
+- Python 3.7+
+- Standard Python libraries: `contextlib`, `dataclasses`, `datetime`, `functools`, `hashlib`, `operator`, `os`, `shutil`, `sys`, `urllib.request`, `zlib`
+- Internet connection for cloning remote repositories
 
-## License
+## Usage
 
-This project is licensed under the MIT License.
+### Initialize a Repository
+
+To initialize a new Git repository:
+
+```sh
+python simple_git.py init
 ```
 
-This `README.md` provides a comprehensive overview of the project, including usage examples and descriptions for each command. If you need any further modifications or additional sections, please let me know!
+This will create a `.git` directory with the necessary subdirectories and files. Specifically, it creates:
+
+- `.git/objects`: Directory to store Git objects.
+- `.git/refs`: Directory to store references to branches.
+- `.git/HEAD`: File to store the reference to the current branch.
+
+### Hash a File
+
+To hash a file and optionally save it as a Git object:
+
+```sh
+python simple_git.py hash-object -w <filename>
+```
+
+This will compute the SHA-1 hash of the file and save it as a Git object in the `.git/objects` directory. The `-w` flag indicates that the file should be written to the object store.
+
+### List Tree Contents
+
+To list the contents of a tree object:
+
+```sh
+python simple_git.py ls-tree --name-only <tree_sha1>
+```
+
+This will print the names of the files in the specified tree object. The `--name-only` flag indicates that only the names of the files should be printed.
+
+### Write Tree
+
+To write the current directory tree to a tree object:
+
+```sh
+python simple_git.py write-tree
+```
+
+This will create a tree object representing the current directory structure and print its SHA-1 hash. The tree object will be stored in the `.git/objects` directory.
+
+### Commit Tree
+
+To create a commit object:
+
+```sh
+python simple_git.py commit-tree <tree_sha1> -p <parent_sha1> -m <message>
+```
+
+This will create a commit object with the specified tree, parent, and message, and print its SHA-1 hash. The `-p` flag specifies the parent commit, and the `-m` flag specifies the commit message.
+
+### Clone a Repository
+
+To clone a remote repository:
+
+```sh
+python simple_git.py clone <url> <folder>
+```
+
+This will clone the repository from the specified URL into the specified folder. The clone operation involves fetching the repository's objects and references and setting up the working directory.
+
+## Code Overview
+
+### `init(create_ref=True)`
+
+Initializes a new Git repository by creating the necessary directories and files. If `create_ref` is `True`, it also creates a `.git/HEAD` file pointing to the `main` branch.
+
+### `cat_file()`
+
+Displays the content of a Git object specified by its SHA-1 hash. It reads the object from the `.git/objects` directory, decompresses it, and prints its content.
+
+### `hash_object(filename: str = None, save: bool = True) -> str`
+
+Hashes a file and optionally saves it as a Git object. It reads the file content, computes its SHA-1 hash, compresses the content, and optionally saves it in the `.git/objects` directory. Returns the SHA-1 hash of the file.
+
+### `ls_tree()`
+
+Lists the contents of a tree object specified by its SHA-1 hash. It reads the tree object from the `.git/objects` directory, decompresses it, and prints the names of the files in the tree.
+
+### `write_tree(path: str) -> str`
+
+Writes the current directory tree to a tree object and returns its SHA-1 hash. It recursively scans the directory, hashes the files, and creates a tree object representing the directory structure. The tree object is saved in the `.git/objects` directory.
+
+### `commit_tree()`
+
+Creates a commit object with the specified tree, parent, and message, and returns its SHA-1 hash. It constructs the commit content, computes its SHA-1 hash, compresses the content, and saves it in the `.git/objects` directory.
+
+### `clone()`
+
+Clones a remote repository from the specified URL into the specified folder. It fetches the repository's objects and references, sets up the `.git` directory, and restores the working directory.
+
+### `restore_working_dir(tree_ref: str, o_store: dict[str, GitObject], path: str = "", mode: int = 0)`
+
+Restores the working directory from a tree object. It recursively reads the tree object, restores the files and directories, and sets their permissions.
+
+### `collect_entries(path=".") -> list[os.DirEntry]`
+
+Collects all entries (files and directories) in the specified directory, excluding the `.git` directory. It returns a list of `os.DirEntry` objects representing the entries.
+
+### `restore_index()`
+
+Restores the index from the working directory. It collects all entries in the working directory, hashes the files, and writes the index file in the `.git` directory.
+
+### `main()`
+
+Main function to handle different Git commands. It parses the command-line arguments and calls the appropriate function based on the command.
+
