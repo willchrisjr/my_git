@@ -13,7 +13,7 @@ from typing import Iterator, Union
 
 # Initialize a new git repository
 def init(create_ref=True):
-    os.mkdir(".git")  # Create the .git directory
+    os.mkdir(".git")  # Create the .git directory here
     os.mkdir(".git/objects")  # Create the objects directory inside .git
     os.mkdir(".git/refs")  # Create the refs directory inside .git
     if create_ref:

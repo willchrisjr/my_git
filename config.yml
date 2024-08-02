@@ -1,0 +1,7 @@
+# Set this to true if you want debug logs.
+#
+#
+debug: true
+#
+# Available versions: python-3.12
+language_pack: python-3.12
